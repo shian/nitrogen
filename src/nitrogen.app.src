@@ -1,0 +1,24 @@
+%% -*- mode: erlang -*-
+
+{application, nitrogen,
+ [
+  {description, "Nitrogen Web Server"},
+  {vsn, "2.1.0"},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {mod, { nitrogen_app, []}},
+  {env, [
+	 %% If a signkey is not specified, then Nitrogen uses the Erlang cookie.
+	 %% {signkey, "SECRET"}, 
+
+	 %% Default session timeout is 20 minutes.
+	 %% {session_timeout, 20},
+
+	 %% Specify a session cookie name. Uses "wf" by default.
+	 %% {cookie_name, "wf"},
+
+	 {bind_address, "0.0.0.0"},
+	 {port, 8000},
+	 {server_name, nitrogen}
+	]}
+ ]}.
