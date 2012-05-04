@@ -31,15 +31,12 @@ init(_Config, State) ->
     RequestBridge = wf_context:request_bridge(),
     Path = RequestBridge:path(),
 
-    %%io:fwrite("~s~n", [Path]),
-
     % Convert the path to a module. If there are no routes defined, then just
     % convert everything without an extension to a module.
     % Otherwise, look through all routes for the first matching route.
     {Module, PathInfo} = route(Path),
     {Module1, PathInfo1} = check_for_404(Module, PathInfo, Path),
 
-    %%io:fwrite("~p~n", [{Module1, PathInfo1}]),
     wf_context:page_module(Module1),
     wf_context:path_info(PathInfo1),
 
@@ -66,7 +63,7 @@ route(Path) ->
             % Serve this up as a static file.
 	    Path1 = string:strip(Path, both, $/),
             [App|Path2] = string:tokens(Path1, "/"),
-	    try code:priv_dir(list_to_existing_atom(App)) of
+	    try filename:absname(code:priv_dir(list_to_existing_atom(App))) of
 		{error, _} ->		  
 		    {static_file, Path};
 		PrivDir ->
@@ -87,23 +84,6 @@ route(Path) ->
                     {web_404, Path1}
             end
     end.
-
-%% find_loaded_module(Tokens) -> find_loaded_module(Tokens, []).	
-%% find_loaded_module([], _ExtraTokens) -> undefined;
-%% find_loaded_module(Tokens, ExtraTokens) ->
-%%     BeamFile = "/" ++ string:join(Tokens, "_") ++ ".beam",
-%%     F = fun({_Module, Path}) -> is_list(Path) andalso string:rstr(Path, BeamFile) /= 0 end,
-%%     case lists:filter(F, code:all_loaded()) of 
-%%         [{Module, _}] -> 
-%%             case erlang:function_exported(Module, main, 0) of
-%%                 true ->
-%%                     {Module, string:join(lists:reverse(ExtraTokens), "/")};
-%%                 false ->
-%%                     find_loaded_module(tl(lists:reverse(Tokens)), [hd(lists:reverse(Tokens))|ExtraTokens])
-%%             end;
-%%         [] -> 
-%%             find_loaded_module(tl(lists:reverse(Tokens)), [hd(lists:reverse(Tokens))|ExtraTokens])
-%%     end.
 
 module_name(Tokens) ->
     ModulePrefix = wf:config_default(module_prefix, ""),
